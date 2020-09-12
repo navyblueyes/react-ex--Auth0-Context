@@ -1,35 +1,18 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import SiteHeader from './components/SiteHeader';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
-import createAuth0Client from '@auth0/auth0-spa-js';
 import './App.css';
+import { useAuth0 } from './context/auth0-context';
+import PrivateRoute from './components/PrivateRoute';
 
 // Auth0 help -- 
 // minktalk-port.us.auth0.com
 // LItKCjIm1Zg27OJtntejSKz6gZbhz2dJ
 
 export default function App() {
-  const [user, setUser] = useState(null);
-
-  // utilize UseEffect because we need to check ONCE on re-render
-  useEffect(() => {
-    initAuth();
-
-    async function initAuth() {
-      const auth0 = await createAuth0Client({
-        domain: 'minktalk-port.us.auth0.com',
-        client_id: 'LItKCjIm1Zg27OJtntejSKz6gZbhz2dJ'
-      });
-
-      const isAuthenticated = await auth0.isAuthenticated();
-      console.log(isAuthenticated);
-
-      const user = await auth0.getUser();
-      console.log(user);
-    }
-  }, [])
+  const auth0 = useAuth0();
 
   return (
     <Router>
@@ -39,12 +22,13 @@ export default function App() {
 
         {/* routes */}
         <Switch>
-          <Route path="/dashboard">
+          <PrivateRoute path="/dashboard">
             <Dashboard />
-          </Route>
-          <Route path="/" exact={true}>
+          </PrivateRoute>
+          <PrivateRoute path="/" exact={true}>
             <Home />
-          </Route>
+            {console.log(auth0)}
+          </PrivateRoute>
         </Switch>
       </div>
     </Router>
